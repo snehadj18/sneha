@@ -1,0 +1,366 @@
+
+from google.colab import drive
+drive.mount('/content/drive')
+Mounted at /content/drive
+!pip install tensorflow
+!pip install opencv-python
+!pip install opencv-contrib-python
+import tensorflow as tf
+import numpy as np
+from tensorflow import keras
+import os
+import cv2
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing import image
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: tensorflow in /usr/local/lib/python3.7/dist-packages (2.9.2)
+Requirement already satisfied: keras-preprocessing>=1.1.1 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (1.1.2)
+Requirement already satisfied: flatbuffers<2,>=1.12 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (1.12)
+Requirement already satisfied: google-pasta>=0.1.1 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (0.2.0)
+Requirement already satisfied: opt-einsum>=2.3.2 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (3.3.0)
+Requirement already satisfied: gast<=0.4.0,>=0.2.1 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (0.4.0)
+Requirement already satisfied: six>=1.12.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (1.15.0)
+Requirement already satisfied: tensorboard<2.10,>=2.9 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (2.9.1)
+Requirement already satisfied: tensorflow-io-gcs-filesystem>=0.23.1 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (0.27.0)
+Requirement already satisfied: grpcio<2.0,>=1.24.3 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (1.50.0)
+Requirement already satisfied: h5py>=2.9.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (3.1.0)
+Requirement already satisfied: keras<2.10.0,>=2.9.0rc0 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (2.9.0)
+Requirement already satisfied: wrapt>=1.11.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (1.14.1)
+Requirement already satisfied: absl-py>=1.0.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (1.3.0)
+Requirement already satisfied: protobuf<3.20,>=3.9.2 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (3.19.6)
+Requirement already satisfied: astunparse>=1.6.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (1.6.3)
+Requirement already satisfied: libclang>=13.0.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (14.0.6)
+Requirement already satisfied: setuptools in /usr/local/lib/python3.7/dist-packages (from tensorflow) (57.4.0)
+Requirement already satisfied: packaging in /usr/local/lib/python3.7/dist-packages (from tensorflow) (21.3)
+Requirement already satisfied: termcolor>=1.1.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (2.1.0)
+Requirement already satisfied: tensorflow-estimator<2.10.0,>=2.9.0rc0 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (2.9.0)
+Requirement already satisfied: typing-extensions>=3.6.6 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (4.1.1)
+Requirement already satisfied: numpy>=1.20 in /usr/local/lib/python3.7/dist-packages (from tensorflow) (1.21.6)
+Requirement already satisfied: wheel<1.0,>=0.23.0 in /usr/local/lib/python3.7/dist-packages (from astunparse>=1.6.0->tensorflow) (0.38.3)
+Requirement already satisfied: cached-property in /usr/local/lib/python3.7/dist-packages (from h5py>=2.9.0->tensorflow) (1.5.2)
+Requirement already satisfied: tensorboard-data-server<0.7.0,>=0.6.0 in /usr/local/lib/python3.7/dist-packages (from tensorboard<2.10,>=2.9->tensorflow) (0.6.1)
+Requirement already satisfied: google-auth<3,>=1.6.3 in /usr/local/lib/python3.7/dist-packages (from tensorboard<2.10,>=2.9->tensorflow) (2.14.1)
+Requirement already satisfied: tensorboard-plugin-wit>=1.6.0 in /usr/local/lib/python3.7/dist-packages (from tensorboard<2.10,>=2.9->tensorflow) (1.8.1)
+Requirement already satisfied: werkzeug>=1.0.1 in /usr/local/lib/python3.7/dist-packages (from tensorboard<2.10,>=2.9->tensorflow) (1.0.1)
+Requirement already satisfied: markdown>=2.6.8 in /usr/local/lib/python3.7/dist-packages (from tensorboard<2.10,>=2.9->tensorflow) (3.4.1)
+Requirement already satisfied: requests<3,>=2.21.0 in /usr/local/lib/python3.7/dist-packages (from tensorboard<2.10,>=2.9->tensorflow) (2.23.0)
+Requirement already satisfied: google-auth-oauthlib<0.5,>=0.4.1 in /usr/local/lib/python3.7/dist-packages (from tensorboard<2.10,>=2.9->tensorflow) (0.4.6)
+Requirement already satisfied: rsa<5,>=3.1.4 in /usr/local/lib/python3.7/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow) (4.9)
+Requirement already satisfied: cachetools<6.0,>=2.0.0 in /usr/local/lib/python3.7/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow) (5.2.0)
+Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python3.7/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow) (0.2.8)
+Requirement already satisfied: requests-oauthlib>=0.7.0 in /usr/local/lib/python3.7/dist-packages (from google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.10,>=2.9->tensorflow) (1.3.1)
+Requirement already satisfied: importlib-metadata>=4.4 in /usr/local/lib/python3.7/dist-packages (from markdown>=2.6.8->tensorboard<2.10,>=2.9->tensorflow) (4.13.0)
+Requirement already satisfied: zipp>=0.5 in /usr/local/lib/python3.7/dist-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard<2.10,>=2.9->tensorflow) (3.10.0)
+Requirement already satisfied: pyasn1<0.5.0,>=0.4.6 in /usr/local/lib/python3.7/dist-packages (from pyasn1-modules>=0.2.1->google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow) (0.4.8)
+Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.7/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow) (2022.9.24)
+Requirement already satisfied: idna<3,>=2.5 in /usr/local/lib/python3.7/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow) (2.10)
+Requirement already satisfied: urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1 in /usr/local/lib/python3.7/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow) (1.24.3)
+Requirement already satisfied: chardet<4,>=3.0.2 in /usr/local/lib/python3.7/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow) (3.0.4)
+Requirement already satisfied: oauthlib>=3.0.0 in /usr/local/lib/python3.7/dist-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.10,>=2.9->tensorflow) (3.2.2)
+Requirement already satisfied: pyparsing!=3.0.5,>=2.0.2 in /usr/local/lib/python3.7/dist-packages (from packaging->tensorflow) (3.0.9)
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: opencv-python in /usr/local/lib/python3.7/dist-packages (4.6.0.66)
+Requirement already satisfied: numpy>=1.14.5 in /usr/local/lib/python3.7/dist-packages (from opencv-python) (1.21.6)
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: opencv-contrib-python in /usr/local/lib/python3.7/dist-packages (4.6.0.66)
+Requirement already satisfied: numpy>=1.14.5 in /usr/local/lib/python3.7/dist-packages (from opencv-contrib-python) (1.21.6)
+train=ImageDataGenerator(rescale=1./255,
+                                 shear_range=0.2,
+                                 rotation_range=180,
+                                 zoom_range=0.2,
+                                 horizontal_flip=True)
+train = ImageDataGenerator(rescale=1/255)
+test = ImageDataGenerator(rescale=1/255)
+train_dataset = train.flow_from_directory("/content/drive/MyDrive/Dataset/train_set",
+                                          target_size=(128,128),
+                                          batch_size = 32,
+                                          class_mode = 'binary' )
+Found 443 images belonging to 2 classes.
+test_dataset = test.flow_from_directory("/content/drive/MyDrive/Dataset/test_set",
+                                          target_size=(128,128),
+                                          batch_size = 32,
+                                          class_mode = 'binary' )
+Found 121 images belonging to 2 classes.
+test_dataset.class_indices
+{'forest': 0, 'with fire': 1}
+#to define linear initialisation import sequential
+from keras.models import Sequential
+#to add layer import Dense
+from keras.layers import Dense
+#to create convolution kernel import convolution2D
+from keras.layers import Convolution2D
+#import Maxpooling layer
+from keras.layers import MaxPooling2D
+#import flatten layer
+from keras.layers import Flatten
+import warnings
+warnings.filterwarnings('ignore')
+model = keras.Sequential()
+model.add(Convolution2D(32,(3,3),input_shape=(128,128,3),activation='relu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Convolution2D(32,(3,3),activation='relu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Convolution2D(32,(3,3),activation='relu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Convolution2D(32,(3,3),activation='relu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Flatten())
+model.add(Dense(150,activation='relu'))
+
+model.add(Dense(1,activation='sigmoid'))
+model.compile(loss = 'binary_crossentropy',
+              optimizer = "adam",
+              metrics = ["accuracy"])
+r = model.fit(train_dataset, epochs = 5, validation_data = test_dataset)
+Epoch 1/5
+14/14 [==============================] - 138s 10s/step - loss: 0.5309 - accuracy: 0.7043 - val_loss: 0.3306 - val_accuracy: 0.9174
+Epoch 2/5
+14/14 [==============================] - 26s 2s/step - loss: 0.3483 - accuracy: 0.8307 - val_loss: 0.1277 - val_accuracy: 0.9421
+Epoch 3/5
+14/14 [==============================] - 28s 2s/step - loss: 0.2689 - accuracy: 0.8713 - val_loss: 0.1042 - val_accuracy: 0.9587
+Epoch 4/5
+14/14 [==============================] - 28s 2s/step - loss: 0.1740 - accuracy: 0.9233 - val_loss: 0.0584 - val_accuracy: 0.9917
+Epoch 5/5
+14/14 [==============================] - 26s 2s/step - loss: 0.1542 - accuracy: 0.9300 - val_loss: 0.0409 - val_accuracy: 1.0000
+predictions = model.predict(test_dataset)
+predictions = np.round(predictions)
+4/4 [==============================] - 7s 2s/step
+predictions
+array([[0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [1.],
+       [1.],
+       [1.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [1.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [1.],
+       [1.],
+       [0.],
+       [1.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [1.],
+       [1.],
+       [1.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [1.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [1.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [1.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [1.],
+       [1.],
+       [1.],
+       [0.],
+       [1.],
+       [0.]], dtype=float32)
+print(len(predictions))
+121
+model.save("/content/forest1.h5")
+#import load_model from keras.model
+from keras.models import load_model
+#import image class from keras
+import tensorflow as tf
+from tensorflow.keras.preprocessing import image
+#import numpy
+import numpy as np
+#import cv2
+import cv2
+model = load_model("/content/forest1.h5")
+import matplotlib.pyplot as plt
+plt.plot(r.history['loss'],label='loss')
+plt.plot(r.history['val_loss'],label='val_loss')
+plt.legend()
+
+plt.plot(r.history['accuracy'],label='acc')
+plt.plot(r.history['val_accuracy'],label='val_acc')
+plt.legend()
+
+def predictImage(filename):
+  img1=image.load_img(filename,target_size=(128,128))
+  plt.imshow(img1)
+  y=image.img_to_array(img1)
+  x=np.expand_dims(y,axis=0)
+  val=model.predict(x)
+  print(val)
+  if val==0:
+    plt.xlabel(" NO fire",fontsize=30)
+  elif val==1:
+    plt.xlabel("fire",fontsize=30)
+predictImage("/content/drive/MyDrive/Dataset/test_set/with fire/Forest_Fire (3).jpg")
+1/1 [==============================] - 0s 90ms/step
+[[1.]]
+
+predictImage("/content/drive/MyDrive/Dataset/test_set/forest/01_NeilBurnell_Mystical_photoverticall.jpg")
+1/1 [==============================] - 0s 36ms/step
+[[0.]]
+
+pip install twilio
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: twilio in /usr/local/lib/python3.7/dist-packages (7.15.2)
+Requirement already satisfied: requests>=2.0.0 in /usr/local/lib/python3.7/dist-packages (from twilio) (2.23.0)
+Requirement already satisfied: pytz in /usr/local/lib/python3.7/dist-packages (from twilio) (2022.6)
+Requirement already satisfied: PyJWT<3.0.0,>=2.0.0 in /usr/local/lib/python3.7/dist-packages (from twilio) (2.6.0)
+Requirement already satisfied: urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1 in /usr/local/lib/python3.7/dist-packages (from requests>=2.0.0->twilio) (1.24.3)
+Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.7/dist-packages (from requests>=2.0.0->twilio) (2022.9.24)
+Requirement already satisfied: idna<3,>=2.5 in /usr/local/lib/python3.7/dist-packages (from requests>=2.0.0->twilio) (2.10)
+Requirement already satisfied: chardet<4,>=3.0.2 in /usr/local/lib/python3.7/dist-packages (from requests>=2.0.0->twilio) (3.0.4)
+pip install playsound
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: playsound in /usr/local/lib/python3.7/dist-packages (1.3.0)
+pip install opencv-python
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: opencv-python in /usr/local/lib/python3.7/dist-packages (4.6.0.66)
+Requirement already satisfied: numpy>=1.14.5 in /usr/local/lib/python3.7/dist-packages (from opencv-python) (1.21.6)
+#import opencv librariy
+import cv2
+#import numpy
+import numpy as np
+#import image function from keras
+from keras.preprocessing import image
+#import load_model from keras
+from keras.models import load_model
+#import client from twilio API
+from twilio.rest import Client
+#imort playsound package
+from playsound import playsound
+#load the saved model
+model = load_model(r'/content/forest1.h5')
+#define video
+video = cv2.VideoCapture('/content/forest fire.mp4')
+#define the features
+name = ['forest','with forest']
+video.isOpened()
+True
+from tensorflow.keras.preprocessing import image
+from IPython.display import Audio
+while(video.isOpened()):
+  success,frame=video.read()
+  cv2.imwrite("image.jpg",frame)
+  img=image.load_img("/content/image.jpg",target_size=(128,128))
+  x=image.img_to_array(img)
+  x=np.expand_dims(x,axis=0)
+  pred=model.predict(x)
+  p=pred[0]
+  print(pred)
+  cv2.putText(frame,"predicted class = ",(100,100),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 1)
+  if pred[0]==1:
+    account_sid='AC1a92521871480f58548ab47433527298'
+    auth_token='596097e117fb2295a39c05a192353001'
+    client=Client(account_sid,auth_token)
+    message=client.messages \
+    .create(
+        body="Forest fire is detected ,stay alert",
+        from_='+14258421887',
+        to='+919150947787')
+    print(message.sid)
+    print('Fire detected')
+    print('SMS sent')
+    wn=Audio('/content/tornado-siren.mp3',autoplay=True)
+    display(wn)
+    break
+  else:
+    print('No danger')
+    break
+  if cv2.waitKey(1) & 0xFF==ord('a'):
+    break
+video.release()
+cv2.destroyAllWindows()
+1/1 [==============================] - 0s 100ms/step
+[[1.]]
+SM0df87da05565a3b5c343504f724bd82b
+Fire detected
+SMS sent
